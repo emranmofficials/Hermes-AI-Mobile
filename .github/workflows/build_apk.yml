@@ -47,16 +47,16 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.5
-          name: "Hermes Agent v1.0.5 Release"
+          tag_name: v1.0.6
+          name: "Hermes Agent v1.0.6 Release"
           body: |
-            ## 📱 Hermes Agent Mobile Release v1.0.5
+            ## 📱 Hermes Agent Mobile Release v1.0.6
             
             Official 100% Mobile Clone of Nous Research Hermes Agent Webapp & Dashboard (`NousResearch/hermes-agent`).
             
-            ### ✨ What's New in v1.0.5
-            - **Google Gemini 3.8 Flash:** Updated default Gemini model to `gemini-3.8-flash` (Google's latest free-tier ultra-fast multimodal model).
-            - **Quick Chips:** Added `gemini-3.8-flash` in Settings quick selection.
+            ### ✨ What's New in v1.0.6
+            - **Google Gemini Official Native REST API Integration:** Implemented direct `v1beta/models/:streamGenerateContent` support, bypassing third-party adapter issues.
+            - **Universal Model Compatibility:** Flawless streaming with `gemini-3.8-flash` and all official Gemini models.
             
             Download the APK below and install on your Android device!
           files: build/app/outputs/flutter-apk/app-release.apk

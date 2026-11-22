@@ -41,6 +41,8 @@ class HermesService {
       // 2. Direct Cloud LLM Mode (OpenAI / OpenRouter / Nous Portal)
       if (settings.apiKey.trim().isEmpty) {
         yield* _simulateAgentLoop(prompt);
+      } else if (settings.cloudProvider == CloudProvider.gemini) {
+        yield* _streamFromGeminiNative(history, prompt, settings, activeMemories);
       } else {
         yield* _streamFromOpenAICompatible(history, prompt, settings, activeMemories);
       }
@@ -112,6 +114,101 @@ class HermesService {
       yield {'type': 'error', 'content': 'Hermes Gateway error: $e'};
     } finally {
       _channel?.sink.close();
+    }
+  }
+
+  Stream<dynamic> _streamFromGeminiNative(
+    List<Message> history,
+    String prompt,
+    AppSettings settings,
+    List<dynamic>? activeMemories,
+  ) async* {
+    final client = http.Client();
+    try {
+      var modelName = settings.selectedModel.trim();
+      if (modelName.startsWith('models/')) {
+        modelName = modelName.replaceFirst('models/', '');
+      }
+      if (modelName.isEmpty) modelName = 'gemini-3.8-flash';
+
+      final endpoint = Uri.parse(
+        'https://generativelanguage.googleapis.com/v1beta/models/$modelName:streamGenerateContent?alt=sse&key=${settings.apiKey}',
+      );
+
+      String memoryContext = '';
+      if (activeMemories != null && activeMemories.isNotEmpty) {
+        memoryContext = '\n[User & Project Memories]:\n' +
+            activeMemories.map((m) => '- ${m.key}: ${m.content}').join('\n');
+      }
+
+      final contents = [
+        ...history.map((m) => {
+              'role': m.role == MessageRole.user ? 'user' : 'model',
+              'parts': [
+                {'text': m.content}
+              ],
+            }),
+        {
+          'role': 'user',
+          'parts': [
+            {'text': prompt}
+          ],
+        }
+      ];
+
+      final requestBody = {
+        'systemInstruction': {
+          'parts': [
+            {'text': '${settings.systemPrompt}$memoryContext'}
+          ]
+        },
+        'contents': contents,
+        'generationConfig': {
+          'temperature': settings.temperature,
+        },
+      };
+
+      final request = http.Request('POST', endpoint);
+      request.headers['Content-Type'] = 'application/json';
+      request.body = jsonEncode(requestBody);
+
+      final response = await client.send(request);
+
+      if (response.statusCode != 200) {
+        final body = await response.stream.bytesToString();
+        yield {'type': 'error', 'content': 'Gemini API Error (${response.statusCode}): $body'};
+        return;
+      }
+
+      final stream = response.stream
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
+
+      await for (final line in stream) {
+        if (line.startsWith('data: ')) {
+          final data = line.substring(6).trim();
+          if (data.isEmpty) continue;
+          try {
+            final parsed = jsonDecode(data);
+            final candidates = parsed['candidates'] as List<dynamic>?;
+            if (candidates != null && candidates.isNotEmpty) {
+              final parts = candidates[0]['content']?['parts'] as List<dynamic>?;
+              if (parts != null) {
+                for (final part in parts) {
+                  final text = part['text'];
+                  if (text != null) {
+                    yield {'type': 'token', 'content': text};
+                  }
+                }
+              }
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (e) {
+      yield {'type': 'error', 'content': 'Gemini Connection error: $e'};
+    } finally {
+      client.close();
     }
   }
 
