@@ -1,7 +1,7 @@
 name: hermes_mobile
 description: "Hermes AI Mobile - 100% Mobile Clone of Nous Research Hermes Agent"
 publish_to: 'none'
-version: 1.0.4+5
+version: 1.0.5+6
 
 environment:
   sdk: ^3.5.0
