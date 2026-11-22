@@ -151,6 +151,29 @@ class LocalStorage {
     ];
   }
 
+  static List<MemoryItem> _defaultMemories() {
+    return [
+      MemoryItem(
+        id: 'mem_1',
+        key: 'User Preferences',
+        content: 'Preferred response language: Bengali (বাংলা).\nFramework: Flutter 3+ Dart.',
+        category: 'preference',
+      ),
+      MemoryItem(
+        id: 'mem_2',
+        key: 'Agent Persona',
+        content: 'Hermes 3 / Nous Research autonomous coding and reasoning assistant.',
+        category: 'system',
+      ),
+      MemoryItem(
+        id: 'mem_3',
+        key: 'Active Architecture',
+        content: 'Autonomous task planning loop with tool execution (bash, web_search, files).',
+        category: 'project',
+      ),
+    ];
+  }
+
   static List<KanbanTask> _defaultTasks() {
     return [
       KanbanTask(

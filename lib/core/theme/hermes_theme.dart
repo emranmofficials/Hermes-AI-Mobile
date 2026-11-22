@@ -28,7 +28,7 @@ class HermesTheme {
         surface: surface,
         error: danger,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: cardColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
