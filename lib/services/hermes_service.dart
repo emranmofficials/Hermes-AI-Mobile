@@ -6,6 +6,7 @@ import '../models/app_settings.dart';
 import '../models/message.dart';
 import '../models/tool_call.dart';
 import '../models/system_stats.dart';
+import 'tool_executor.dart';
 
 class HermesService {
   WebSocketChannel? _channel;
@@ -26,7 +27,7 @@ class HermesService {
     return SystemStats();
   }
 
-  /// Streams response from Hermes Agent backend (JSON-RPC 2.0) or Cloud Provider
+  /// Streams response from Hermes Agent backend (JSON-RPC 2.0) or Cloud Provider with real autonomous tools
   Stream<dynamic> sendMessage({
     required List<Message> history,
     required String prompt,
@@ -38,13 +39,27 @@ class HermesService {
       // 1. Official Gateway Mode (JSON-RPC 2.0 over WebSocket)
       yield* _streamFromJsonRpcGateway(history, prompt, settings);
     } else {
-      // 2. Direct Cloud LLM Mode (OpenAI / OpenRouter / Nous Portal)
+      // 2. Direct Cloud LLM Mode with Real On-Device Tool Execution Engine
       if (settings.apiKey.trim().isEmpty) {
-        yield* _simulateAgentLoop(prompt);
-      } else if (settings.cloudProvider == CloudProvider.gemini) {
-        yield* _streamFromGeminiNative(history, prompt, settings, activeMemories);
+        yield {
+          'type': 'token',
+          'content': '⚠️ **API Key পাওয়া যায়নি!**\n\n'
+              'Hermes Agent দিয়ে আসল এআই রেসপন্স ও টার্মিনাল/ফাইল প্রসেসিং করতে অনুগ্রহ করে একটি কার্যকর API Key প্রদান করুন:\n\n'
+              '1. **Google Gemini (ফ্রি ও দ্রুততম):**\n'
+              '   - [Google AI Studio](https://aistudio.google.com/app/apikey) থেকে ফ্রি এপিআই কি নিন।\n'
+              '   - অ্যাপের **Suite > Environment Secrets** অথবা **Config** ট্যাবে গিয়ে **GEMINI_API_KEY** ঘরে পেস্ট করুন।\n\n'
+              '2. **OpenRouter / Nous Portal:**\n'
+              '   - OpenRouter Key দিয়ে Hermes 3 Llama-405B বা অন্যান্য মডেল ব্যবহার করতে পারেন।\n\n'
+              '3. **Hermes Gateway (Local Termux):**\n'
+              '   - টার্মাক্সে লোকাল গেটওয়ে চালু থাকলে Config থেকে **Hermes Gateway** মোড নির্বাচন করুন।',
+        };
+        return;
+      }
+
+      if (settings.cloudProvider == CloudProvider.gemini) {
+        yield* _streamFromGeminiNativeWithTools(history, prompt, settings, activeMemories);
       } else {
-        yield* _streamFromOpenAICompatible(history, prompt, settings, activeMemories);
+        yield* _streamFromOpenAICompatibleWithTools(history, prompt, settings, activeMemories);
       }
     }
   }
@@ -77,7 +92,7 @@ class HermesService {
 
       await for (final rawMsg in _channel!.stream) {
         final parsed = jsonDecode(rawMsg);
-        
+
         // Handle JSON-RPC error
         if (parsed['error'] != null) {
           yield {'type': 'error', 'content': parsed['error']['message'] ?? 'JSON-RPC Error'};
@@ -111,13 +126,44 @@ class HermesService {
         }
       }
     } catch (e) {
-      yield {'type': 'error', 'content': 'Hermes Gateway error: $e'};
+      yield {'type': 'error', 'content': 'Hermes Gateway error: $e\n\nEnsure Termux gateway is active on ${settings.gatewayUrl}.'};
     } finally {
       _channel?.sink.close();
     }
   }
 
-  Stream<dynamic> _streamFromGeminiNative(
+  String _buildSystemPrompt(AppSettings settings, List<dynamic>? activeMemories) {
+    String memoryContext = '';
+    if (activeMemories != null && activeMemories.isNotEmpty) {
+      memoryContext = '\n\n[Active Persistent Memories]:\n' +
+          activeMemories.map((m) => '- ${m.key}: ${m.content}').join('\n');
+    }
+
+    return '''${settings.systemPrompt}$memoryContext
+
+# REAL AUTONOMOUS ON-DEVICE TOOLS (TERMUX / ANDROID)
+You have direct access to REAL execution tools on the user's Android phone:
+1. `bash`: Run real shell commands (e.g. ls, mkdir, cd, python, git, curl, ps).
+   Argument: `{"command": "command_to_run"}`
+2. `write_file`: Create or edit real files on the filesystem.
+   Argument: `{"path": "file_path", "content": "contents"}`
+3. `read_file`: Read real file content from disk.
+   Argument: `{"path": "file_path"}`
+4. `list_files`: List real directory contents.
+   Argument: `{"path": "directory_path"}`
+5. `web_search`: Search the live web.
+   Argument: `{"query": "search query"}`
+
+To execute a tool, you MUST output this XML tag format:
+<tool_call>
+{"name": "tool_name", "arguments": {"arg": "val"}}
+</tool_call>
+
+Whenever the user asks you to perform a task (e.g. check files, run commands, create scripts, research), call the appropriate tool, inspect the real result, and explain your answer in natural Bengali (বাংলা).''';
+  }
+
+  /// Official Google Gemini Native REST Streaming with On-Device Tool Execution Loop
+  Stream<dynamic> _streamFromGeminiNativeWithTools(
     List<Message> history,
     String prompt,
     AppSettings settings,
@@ -135,11 +181,7 @@ class HermesService {
         'https://generativelanguage.googleapis.com/v1beta/models/$modelName:streamGenerateContent?alt=sse&key=${settings.apiKey}',
       );
 
-      String memoryContext = '';
-      if (activeMemories != null && activeMemories.isNotEmpty) {
-        memoryContext = '\n[User & Project Memories]:\n' +
-            activeMemories.map((m) => '- ${m.key}: ${m.content}').join('\n');
-      }
+      final systemPrompt = _buildSystemPrompt(settings, activeMemories);
 
       final contents = [
         ...history.map((m) => {
@@ -159,7 +201,7 @@ class HermesService {
       final requestBody = {
         'systemInstruction': {
           'parts': [
-            {'text': '${settings.systemPrompt}$memoryContext'}
+            {'text': systemPrompt}
           ]
         },
         'contents': contents,
@@ -184,6 +226,8 @@ class HermesService {
           .transform(utf8.decoder)
           .transform(const LineSplitter());
 
+      StringBuffer fullResponse = StringBuffer();
+
       await for (final line in stream) {
         if (line.startsWith('data: ')) {
           final data = line.substring(6).trim();
@@ -197,12 +241,110 @@ class HermesService {
                 for (final part in parts) {
                   final text = part['text'];
                   if (text != null) {
+                    fullResponse.write(text);
                     yield {'type': 'token', 'content': text};
                   }
                 }
               }
             }
           } catch (_) {}
+        }
+      }
+
+      // Check if model called an autonomous tool
+      final rawText = fullResponse.toString();
+      final toolCallMatch = RegExp(r'<tool_call>(.*?)</tool_call>', dotAll: true).firstMatch(rawText);
+
+      if (toolCallMatch != null) {
+        final jsonStr = toolCallMatch.group(1)?.trim() ?? '{}';
+        try {
+          final toolJson = jsonDecode(jsonStr);
+          final toolName = toolJson['name']?.toString() ?? 'tool';
+          final toolArgs = Map<String, dynamic>.from(toolJson['arguments'] ?? {});
+          final toolId = 'tc_${DateTime.now().millisecondsSinceEpoch}';
+
+          final tool = ToolCall(
+            id: toolId,
+            name: toolName,
+            arguments: toolArgs,
+            status: ToolStatus.running,
+          );
+          yield {'type': 'tool_start', 'tool': tool};
+
+          // REAL ON-DEVICE EXECUTION!
+          final toolResult = await ToolExecutor.executeTool(
+            name: toolName,
+            arguments: toolArgs,
+          );
+
+          yield {
+            'type': 'tool_output',
+            'id': toolId,
+            'output': toolResult['output'] ?? '',
+            'status': toolResult['status'] == 'completed' ? ToolStatus.completed : ToolStatus.error,
+          };
+
+          // Second turn: Feed real tool output back to Gemini
+          yield {'type': 'token', 'content': '\n\n'};
+          final followUpContents = [
+            ...contents,
+            {
+              'role': 'model',
+              'parts': [
+                {'text': rawText}
+              ]
+            },
+            {
+              'role': 'user',
+              'parts': [
+                {
+                  'text': '<tool_response>\n${toolResult['output']}\n</tool_response>\n'
+                      'Explain the result to the user in Bengali (বাংলা).'
+                }
+              ]
+            }
+          ];
+
+          final followUpReq = http.Request('POST', endpoint);
+          followUpReq.headers['Content-Type'] = 'application/json';
+          followUpReq.body = jsonEncode({
+            'systemInstruction': {
+              'parts': [
+                {'text': systemPrompt}
+              ]
+            },
+            'contents': followUpContents,
+            'generationConfig': {'temperature': settings.temperature},
+          });
+
+          final followUpResp = await client.send(followUpReq);
+          if (followUpResp.statusCode == 200) {
+            final followUpStream = followUpResp.stream
+                .transform(utf8.decoder)
+                .transform(const LineSplitter());
+
+            await for (final line in followUpStream) {
+              if (line.startsWith('data: ')) {
+                final d = line.substring(6).trim();
+                if (d.isEmpty) continue;
+                try {
+                  final p = jsonDecode(d);
+                  final cands = p['candidates'] as List<dynamic>?;
+                  if (cands != null && cands.isNotEmpty) {
+                    final prts = cands[0]['content']?['parts'] as List<dynamic>?;
+                    if (prts != null) {
+                      for (final pt in prts) {
+                        final t = pt['text'];
+                        if (t != null) yield {'type': 'token', 'content': t};
+                      }
+                    }
+                  }
+                } catch (_) {}
+              }
+            }
+          }
+        } catch (e) {
+          yield {'type': 'token', 'content': '\n⚠️ Tool parsing error: $e'};
         }
       }
     } catch (e) {
@@ -212,7 +354,8 @@ class HermesService {
     }
   }
 
-  Stream<dynamic> _streamFromOpenAICompatible(
+  /// OpenAI / OpenRouter streaming with On-Device Tool Execution Loop
+  Stream<dynamic> _streamFromOpenAICompatibleWithTools(
     List<Message> history,
     String prompt,
     AppSettings settings,
@@ -221,48 +364,33 @@ class HermesService {
     final client = http.Client();
     try {
       String url = settings.baseUrl.trim();
-      if (url.isEmpty) {
-        if (settings.cloudProvider == CloudProvider.gemini) {
-          url = 'https://generativelanguage.googleapis.com/v1beta/openai';
-        } else {
-          url = 'https://openrouter.ai/api/v1';
-        }
-      }
+      if (url.isEmpty) url = 'https://openrouter.ai/api/v1';
       if (url.endsWith('/')) url = url.substring(0, url.length - 1);
       final endpoint = url.endsWith('/chat/completions')
           ? Uri.parse(url)
           : Uri.parse('$url/chat/completions');
 
-      String memoryContext = '';
-      if (activeMemories != null && activeMemories.isNotEmpty) {
-        memoryContext = '\n[User & Project Memories]:\n' +
-            activeMemories.map((m) => '- ${m.key}: ${m.content}').join('\n');
-      }
+      final systemPrompt = _buildSystemPrompt(settings, activeMemories);
 
       final messagesList = [
-        {
-          'role': 'system',
-          'content': '${settings.systemPrompt}$memoryContext',
-        },
-        ...history.map((m) => {
-              'role': m.role.name,
-              'content': m.content,
-            }),
+        {'role': 'system', 'content': systemPrompt},
+        ...history.map((m) => {'role': m.role.name, 'content': m.content}),
         {'role': 'user', 'content': prompt},
       ];
 
-      final request = http.Request('POST', endpoint);
-      request.headers.addAll({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${settings.apiKey}',
-      });
-
-      request.body = jsonEncode({
+      final requestBody = {
         'model': settings.selectedModel,
         'messages': messagesList,
         'temperature': settings.temperature,
         'stream': true,
-      });
+      };
+
+      final request = http.Request('POST', endpoint);
+      request.headers['Content-Type'] = 'application/json';
+      request.headers['Authorization'] = 'Bearer ${settings.apiKey}';
+      request.headers['HTTP-Referer'] = 'https://hermes.nousresearch.com';
+      request.headers['X-Title'] = 'Hermes AI Mobile';
+      request.body = jsonEncode(requestBody);
 
       final response = await client.send(request);
 
@@ -276,6 +404,8 @@ class HermesService {
           .transform(utf8.decoder)
           .transform(const LineSplitter());
 
+      StringBuffer fullResponse = StringBuffer();
+
       await for (final line in stream) {
         if (line.startsWith('data: ')) {
           final data = line.substring(6).trim();
@@ -284,56 +414,56 @@ class HermesService {
             final parsed = jsonDecode(data);
             final delta = parsed['choices']?[0]?['delta'];
             if (delta != null && delta['content'] != null) {
-              yield {'type': 'token', 'content': delta['content']};
+              final text = delta['content'];
+              fullResponse.write(text);
+              yield {'type': 'token', 'content': text};
             }
           } catch (_) {}
+        }
+      }
+
+      // Check if tool was invoked
+      final rawText = fullResponse.toString();
+      final toolCallMatch = RegExp(r'<tool_call>(.*?)</tool_call>', dotAll: true).firstMatch(rawText);
+
+      if (toolCallMatch != null) {
+        final jsonStr = toolCallMatch.group(1)?.trim() ?? '{}';
+        try {
+          final toolJson = jsonDecode(jsonStr);
+          final toolName = toolJson['name']?.toString() ?? 'tool';
+          final toolArgs = Map<String, dynamic>.from(toolJson['arguments'] ?? {});
+          final toolId = 'tc_${DateTime.now().millisecondsSinceEpoch}';
+
+          yield {
+            'type': 'tool_start',
+            'tool': ToolCall(
+              id: toolId,
+              name: toolName,
+              arguments: toolArgs,
+              status: ToolStatus.running,
+            )
+          };
+
+          // REAL EXECUTION!
+          final toolResult = await ToolExecutor.executeTool(
+            name: toolName,
+            arguments: toolArgs,
+          );
+
+          yield {
+            'type': 'tool_output',
+            'id': toolId,
+            'output': toolResult['output'] ?? '',
+            'status': toolResult['status'] == 'completed' ? ToolStatus.completed : ToolStatus.error,
+          };
+        } catch (e) {
+          yield {'type': 'token', 'content': '\n⚠️ Tool execution error: $e'};
         }
       }
     } catch (e) {
       yield {'type': 'error', 'content': 'Connection failed: $e'};
     } finally {
       client.close();
-    }
-  }
-
-  Stream<dynamic> _simulateAgentLoop(String prompt) async* {
-    final isQuery = prompt.toLowerCase().contains('search') ||
-        prompt.toLowerCase().contains('খোঁজ') ||
-        prompt.toLowerCase().contains('weather');
-
-    if (isQuery) {
-      final tool = ToolCall(
-        id: 'tc_${DateTime.now().millisecondsSinceEpoch}',
-        name: 'web_search',
-        arguments: {'query': prompt},
-        status: ToolStatus.running,
-      );
-      yield {'type': 'tool_start', 'tool': tool};
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      yield {
-        'type': 'tool_output',
-        'id': tool.id,
-        'output': 'Web search indexed 5 matching sources.',
-        'status': ToolStatus.completed,
-      };
-      await Future.delayed(const Duration(milliseconds: 300));
-    }
-
-    final responseText =
-        'আমি Hermes Agent। আপনার নির্দেশনাটি সফলভাবে গৃহীত হয়েছে: "$prompt"।\n\n'
-        '**১০০% ওয়েব অ্যাপ সমমানের ফিচারসমূহ সক্রিয় রয়েছে:**\n'
-        '- 📋 **Kanban Board (/kanban):** অটোনেমাস টাস্ক ও সাব-এজেন্ট ট্র্যাকিং।\n'
-        '- 📁 **Workspace Files (/api/files):** রিয়েল-টাইম ফাইল এক্সপ্লোরার ও কোড ভিউয়ার।\n'
-        '- ⚡ **Skills Hub (/skills):** SKILL.md লার্নিং লুপ।\n'
-        '- 🧠 **Memory Hub (/memory):** USER.md ও MEMORY.md পারসিস্টেন্স।\n'
-        '- 🔌 **JSON-RPC 2.0 WebSocket (/api/ws):** গেটওয়ের অফিসিয়াল প্রোটোকল কানেক্টিভিটি।';
-
-    for (int i = 0; i < responseText.length; i += 3) {
-      final chunk = responseText.substring(
-          i, i + 3 > responseText.length ? responseText.length : i + 3);
-      yield {'type': 'token', 'content': chunk};
-      await Future.delayed(const Duration(milliseconds: 25));
     }
   }
 }
