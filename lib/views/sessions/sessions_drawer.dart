@@ -34,12 +34,16 @@ class SessionsDrawer extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [HermesTheme.primary, HermesTheme.accent],
-                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        'assets/icons/hermes_icon_64x64.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   const Column(

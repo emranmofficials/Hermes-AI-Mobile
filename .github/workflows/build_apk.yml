@@ -47,22 +47,18 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.1
-          name: "Hermes AI Mobile v1.0.1 Release"
+          tag_name: v1.0.2
+          name: "Hermes Agent v1.0.2 Release"
           body: |
-            ## 📱 Hermes AI Mobile Release v1.0.0
+            ## 📱 Hermes Agent Mobile Release v1.0.2
             
-            100% Mobile Clone of the official Nous Research Hermes Agent Webapp & Dashboard (`NousResearch/hermes-agent`).
+            Official 100% Mobile Clone of Nous Research Hermes Agent Webapp & Dashboard (`NousResearch/hermes-agent`).
             
-            ### ✨ Included Features
-            - **Live Agent Chat & Token Streaming** with rich Markdown & Code syntax highlighting.
-            - **Autonomous Tool Call Cards** (`bash`, `web_search`, `read_file`, `write_file`).
-            - **Kanban Task Planning Board** (`/kanban`).
-            - **Workspace File Explorer & Editor** (`/api/files`).
-            - **Dynamic Skills Hub** (`/skills`, `SKILL.md`).
-            - **Long-term Persistent Memory** (`/memory`, `USER.md` & `MEMORY.md`).
-            - **System Stats & Telemetry** (`/api/system/stats`).
-            - **JSON-RPC 2.0 over WebSocket** protocol support.
+            ### ✨ What's New in v1.0.2
+            - **Official Nous Hermes Neon Cube Icons:** Extracted authentic high-resolution icons for all Android mipmap densities and adaptive launcher.
+            - **Embedded Autonomous Developer Prompt:** Pre-configured with full-stack coding, Termux bash execution, Kanban planning, and self-learning capabilities.
+            - **Polished UI Branding:** Official Hermes cube avatars in chat, updated app name to `Hermes Agent`, and refined drawer identity.
+            - **Dual Signature (v1 + v2):** Clean, 100% verified package installation on all Android & Xiaomi MIUI/HyperOS devices.
             
             Download the APK below and install on your Android device!
           files: build/app/outputs/flutter-apk/app-release.apk

@@ -32,11 +32,6 @@ class MessageBubble extends StatelessWidget {
               height: 32,
               margin: const EdgeInsets.only(right: 10, top: 4),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [HermesTheme.primary, HermesTheme.accent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
@@ -46,7 +41,14 @@ class MessageBubble extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(Icons.auto_awesome, size: 18, color: Colors.white),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'assets/icons/hermes_icon_64x64.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.auto_awesome, size: 18, color: Colors.white),
+                ),
+              ),
             ),
           ],
           Flexible(
