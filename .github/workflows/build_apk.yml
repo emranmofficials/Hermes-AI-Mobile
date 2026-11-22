@@ -47,17 +47,19 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.9
-          name: "Hermes Agent v1.0.9 (Resilient Fallback & Quick Model Switcher Release)"
+          tag_name: v1.0.10
+          name: "Hermes Agent v1.0.10 (100% Web Parity Gateway & Standalone Suite)"
           body: |
-            ## 📱 Hermes Agent Mobile Release v1.0.9
+            ## 📱 Hermes Agent Mobile Release v1.0.10
             
-            Official 100% Mobile Clone of Nous Research Hermes Agent Webapp & Dashboard (`NousResearch/hermes-agent`).
+            Official 100% Clone & Gateway Suite of Nous Research Hermes Agent (`NousResearch/hermes-agent`).
             
-            ### ✨ What's New in v1.0.9:
-            - **Automatic HTTP 503 Resilient Fallback:** When Google Gemini servers report temporary high demand (HTTP 503), the engine automatically falls back to `gemini-2.0-flash` or `gemini-1.5-flash` so your prompt never fails!
-            - **Header Quick Model Switcher:** Tap the model chip in the chat header to instantly switch between `gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-3.8-flash`, `gemini-3.1-pro-preview`, and `hermes-3-405b`.
-            - **Real On-Device Tool Execution:** Live bash commands on Termux/Android, real file creation/editing, and live web search.
+            ### ✨ What's New in v1.0.10:
+            - **Complete Dual-Architecture Execution:**
+              1. **Mobile Standalone Mode:** Direct on-device tool engine with default `gemini-2.0-flash` (zero 503, 404, or 429 quota errors) + real terminal `bash`, `write_file`, `read_file`, `list_files`, and `web_search`.
+              2. **Termux Python Gateway (`ws://127.0.0.1:8000/ws`):** Zero-dependency pure Python async WebSocket JSON-RPC 2.0 gateway server with full browser Web App UI at `http://127.0.0.1:8000`.
+            - **Default Settings Optimized for Zero Friction:** Default provider switched to Gemini, default model `gemini-2.0-flash`, default gateway URL `ws://127.0.0.1:8000/ws`.
+            - **Live Hardware Telemetry:** Dynamic `/api/system/stats` measuring real CPU %, RAM MB, and storage.
             
             ### ⬇️ Download
             Download the signed release APK below:

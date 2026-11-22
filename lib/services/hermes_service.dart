@@ -175,7 +175,9 @@ Whenever the user asks you to perform a task (e.g. check files, run commands, cr
       if (modelName.startsWith('models/')) {
         modelName = modelName.replaceFirst('models/', '');
       }
-      if (modelName.isEmpty) modelName = 'gemini-3.8-flash';
+      if (modelName.isEmpty || modelName.contains('hermes') || modelName.contains('llama') || modelName.contains('3.1-pro')) {
+        modelName = 'gemini-2.0-flash';
+      }
 
       final endpoint = Uri.parse(
         'https://generativelanguage.googleapis.com/v1beta/models/$modelName:streamGenerateContent?alt=sse&key=${settings.apiKey}',

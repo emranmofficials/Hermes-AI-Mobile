@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes AI Agent Webapp — Nous Research</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #0a0b10;
+      --bg-surface: #12141c;
+      --bg-card: #181b26;
+      --border-color: #232838;
+      --primary: #00F0FF;
+      --primary-dim: rgba(0, 240, 255, 0.15);
+      --secondary: #7928CA;
+      --accent: #FF007A;
+      --text-main: #FFFFFF;
+      --text-muted: #8E9BB0;
+      --success: #00E676;
+      --warning: #FFD600;
+      --danger: #FF1744;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 260px;
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .brand {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000;
+      font-weight: 900;
+      font-size: 18px;
+    }
+    .brand-text h2 { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+    .brand-text span { font-size: 11px; color: var(--primary); font-family: var(--font-mono); }
+
+    .nav-menu {
+      flex: 1;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+    .nav-item.active {
+      background-color: var(--primary-dim);
+      color: var(--primary);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+    .nav-item i { width: 18px; font-size: 15px; }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--success);
+      font-family: var(--font-mono);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    /* Main Content Area */
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: radial-gradient(circle at top right, rgba(0, 240, 255, 0.03), transparent 40%);
+    }
+
+    /* Top Bar */
+    .topbar {
+      height: 60px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(18, 20, 28, 0.8);
+      backdrop-filter: blur(10px);
+    }
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .model-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--primary);
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #000;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      background: var(--bg-card);
+      border-color: var(--text-muted);
+    }
+
+    /* Views */
+    .tab-view {
+      flex: 1;
+      display: none;
+      overflow: hidden;
+    }
+    .tab-view.active {
+      display: flex;
+    }
+
+    /* Chat View */
+    .chat-layout {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .msg-row {
+      display: flex;
+      gap: 14px;
+      max-width: 850px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .msg-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .msg-avatar.user { background: #2A2E3D; color: #FFF; }
+    .msg-avatar.agent { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; font-weight: bold; }
+    .msg-body {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 18px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    .msg-body.user-bg {
+      background: rgba(0, 240, 255, 0.05);
+      border-color: rgba(0, 240, 255, 0.2);
+    }
+    .msg-body pre {
+      background: #0D0E15;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+
+    /* Tool Call Card */
+    .tool-box {
+      margin: 10px 0;
+      border: 1px solid #33394D;
+      border-radius: 8px;
+      background: #0e1017;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .tool-header {
+      background: #171b26;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #232838;
+      cursor: pointer;
+    }
+    .tool-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+    }
+    .tool-badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .tool-badge.completed { background: rgba(0, 230, 118, 0.15); color: var(--success); }
+    .tool-badge.running { background: rgba(255, 214, 0, 0.15); color: var(--warning); }
+    .tool-badge.error { background: rgba(255, 23, 68, 0.15); color: var(--danger); }
+    .tool-content {
+      padding: 10px 12px;
+      color: #A0ABC0;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    /* Chat Input Area */
+    .chat-input-bar {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .quick-chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .input-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 14px;
+      transition: border 0.2s;
+    }
+    .input-wrapper:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+    .chat-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #FFF;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      max-height: 120px;
+      min-height: 24px;
+      line-height: 1.4;
+    }
+    .send-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: transform 0.1s;
+    }
+    .send-btn:active { transform: scale(0.95); }
+
+    /* Kanban View */
+    .kanban-board {
+      flex: 1;
+      display: flex;
+      gap: 16px;
+      padding: 24px;
+      overflow-x: auto;
+    }
+    .kanban-col {
+      flex: 1;
+      min-width: 280px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .kanban-header {
+      padding: 14px;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .kanban-count {
+      background: var(--bg-card);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      color: var(--primary);
+    }
+    .kanban-cards {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .task-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      cursor: grab;
+      transition: all 0.2s;
+    }
+    .task-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .task-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .task-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
+
+    /* Telemetry View */
+    .telemetry-grid {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      align-content: start;
+    }
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono); }
+    .stat-val { font-size: 32px; font-weight: 700; color: var(--primary); }
+    .stat-bar { height: 6px; background: #232838; border-radius: 3px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 40%; transition: width 0.5s; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      width: 500px;
+      max-width: 90vw;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 16px; font-weight: 700; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+    .form-control {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #FFF;
+      font-size: 13px;
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--primary); }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-feather"></i></div>
+      <div class="brand-text">
+        <h2>HERMES AGENT</h2>
+        <span>Nous Research v1.0.9</span>
+      </div>
+    </div>
+
+    <div class="nav-menu">
+      <div class="nav-item active" onclick="switchTab('chat')">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Chat & Terminal</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('kanban')">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Kanban Planner</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('files')">
+        <i class="fa-solid fa-folder-tree"></i>
+        <span>Files Explorer</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('telemetry')">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span>System Telemetry</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span id="gateway-label">GATEWAY ONLINE</span>
+      </div>
+      <button class="btn btn-outline" style="padding: 6px 10px;" onclick="openConfigModal()">
+        <i class="fa-solid fa-gear"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="topbar">
+      <div class="topbar-title">
+        <span id="view-title">Autonomous Terminal</span>
+        <div class="model-chip" id="active-model-chip">
+          <i class="fa-solid fa-microchip"></i>
+          <span id="model-name-display">gemini-2.0-flash</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline" onclick="clearChat()">
+          <i class="fa-solid fa-trash-can"></i> Clear
+        </button>
+        <button class="btn btn-primary" onclick="openConfigModal()">
+          <i class="fa-solid fa-key"></i> API Config
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. CHAT TAB -->
+    <div class="tab-view active" id="tab-chat">
+      <div class="chat-layout">
+        <div class="chat-messages" id="chat-messages">
+          <!-- Initial Welcome Message -->
+          <div class="msg-row">
+            <div class="msg-avatar agent"><i class="fa-solid fa-feather"></i></div>
+            <div class="msg-body">
+              <strong>Hermes AI Agent (100% Web Parity Gateway)</strong> প্রস্তুত!<br><br>
+              এই সিস্টেম সরাসরি আপনার ফোনে টার্মিনাল কমান্ড (`bash`), ফাইল তৈরি/পড়া (`write_file`/`read_file`), ওয়েব ব্রাউজিং এবং গুগল জেমিনি এআই দিয়ে স্বয়ংক্রিয়ভাবে কাজ করতে পারে।<br><br>
+              👉 কোনো কমান্ড দিয়ে টেস্ট করুন, যেমন: <code>ফোনের স্টোরেজ ও ফাইল চেক করো</code> অথবা <code>একটি পাইথন স্ক্রিপ্ট লিখে চালাও</code>।
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input-bar">
+          <div class="quick-chips">
+            <div class="chip" onclick="quickSend('ফোনে বর্তমান ডিরেক্টরির ফাইলগুলো দেখাও')">📂 List Files</div>
+            <div class="chip" onclick="quickSend('ls -la টার্মিনালে রান করো')">⚡ Run Bash</div>
+            <div class="chip" onclick="quickSend('গিট রেপো স্ট্যাটাস ও লগ চেক করো')">🐙 Git Status</div>
+            <div class="chip" onclick="quickSend('আজকের আবহাওয়া কেমন গুগল সার্চ করো')">🌐 Web Search</div>
+          </div>
+          <div class="input-wrapper">
+            <textarea class="chat-textarea" id="chat-input" placeholder="Hermes Agent-কে নির্দেশ দিন (যেমন: 'টার্মিনালে কমান্ড চালাও')..." rows="1" onkeydown="handleKeyDown(event)"></textarea>
+            <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-arrow-up"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. KANBAN TAB -->
+    <div class="tab-view" id="tab-kanban">
+      <div class="kanban-board">
+        <div class="kanban-col">
+          <div class="kanban-header">
+            <span>TO DO</span>
+            <span class="kanban-count">2</span>
+          </div>
+          <div class="kanban-cards">
+            <div class="task-card">
+              <div class="task-title">Docker Sandbox Container Isolation</div>
+              <div class="task-meta"><span>P1 High</span><span>Subagent 1</span></div>
+            </div>
+            <div class="task-card">
+              <div class="task-title">Playwright Browser Automation MCP</div>
+              <div class="task-meta"><span>P2 Med</span><span>Unassigned</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-header">
+            <span>IN PROGRESS</span>
+            <span class="kanban-count">1</span>
+          </div>
+          <div class="kanban-cards">
+            <div class="task-card" style="border-color: var(--primary);">
+              <div class="task-title">100% Web Parity Gateway Engine</div>
+              <div class="task-meta"><span style="color:var(--primary);">P0 Urgent</span><span>Agent Main</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-header">
+            <span>CODE REVIEW</span>
+            <span class="kanban-count">1</span>
+          </div>
+          <div class="kanban-cards">
+            <div class="task-card">
+              <div class="task-title">JSON-RPC 2.0 WebSocket Streaming</div>
+              <div class="task-meta"><span>P1 High</span><span>Reviewer</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-header">
+            <span>DONE</span>
+            <span class="kanban-count">4</span>
+          </div>
+          <div class="kanban-cards">
+            <div class="task-card" style="opacity: 0.7;">
+              <div class="task-title">Gemini 2.0 Flash Native SSE</div>
+              <div class="task-meta"><span style="color:var(--success);">Completed</span></div>
+            </div>
+            <div class="task-card" style="opacity: 0.7;">
+              <div class="task-title">Resilient HTTP 503 Auto-Fallback</div>
+              <div class="task-meta"><span style="color:var(--success);">Completed</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. FILES TAB -->
+    <div class="tab-view" id="tab-files">
+      <div style="flex:1; display:flex; padding:24px; gap:20px;">
+        <div style="width:280px; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:12px; padding:16px; overflow-y:auto;">
+          <h4 style="font-size:13px; color:var(--text-muted); margin-bottom:12px; font-family:var(--font-mono);">WORKSPACE FILES</h4>
+          <div id="file-list-tree" style="display:flex; flex-direction:column; gap:6px; font-family:var(--font-mono); font-size:12px;">
+            <div>📁 projects/hermes_mobile</div>
+            <div style="padding-left:14px;">📄 pubspec.yaml</div>
+            <div style="padding-left:14px;">📄 README.md</div>
+            <div style="padding-left:14px;">📁 gateway</div>
+            <div style="padding-left:24px; color:var(--primary);">📄 server.py</div>
+            <div style="padding-left:24px;">📁 static</div>
+            <div style="padding-left:34px;">📄 index.html</div>
+          </div>
+        </div>
+        <div style="flex:1; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:12px; display:flex; flex-direction:column; overflow:hidden;">
+          <div style="padding:12px 16px; border-bottom:1px solid var(--border-color); font-size:13px; font-family:var(--font-mono); color:var(--primary); display:flex; justify-content:space-between; align-items:center;">
+            <span>gateway/server.py</span>
+            <span style="font-size:11px; color:var(--text-muted);">Python 3.14 (Async Stdlib)</span>
+          </div>
+          <pre style="flex:1; padding:16px; background:#0d0e15; color:#a0abc0; font-family:var(--font-mono); font-size:12px; overflow:auto;"># Hermes AI Gateway & Webapp Server
+# Zero external dependencies - 100% native Python standard library
+# Running on http://127.0.0.1:8000</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. TELEMETRY TAB -->
+    <div class="tab-view" id="tab-telemetry">
+      <div class="telemetry-grid">
+        <div class="stat-card">
+          <div class="stat-label">CPU LOAD</div>
+          <div class="stat-val" id="stat-cpu">14.2%</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="stat-cpu-bar" style="width: 14%;"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">RAM ALLOCATION</div>
+          <div class="stat-val" id="stat-ram">2,850 MB</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="stat-ram-bar" style="width: 48%;"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">INTERNAL DISK USAGE</div>
+          <div class="stat-val" id="stat-disk">42.8%</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="stat-disk-bar" style="width: 42%;"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ACTIVE SUBAGENTS</div>
+          <div class="stat-val" style="color:var(--secondary);" id="stat-agents">2</div>
+          <div style="font-size:12px; color:var(--text-muted);">Termux Bash + ToolExecutor</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Config Modal -->
+  <div class="modal-overlay" id="config-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key" style="color:var(--primary); margin-right:8px;"></i> Agent Configuration</h3>
+        <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;" onclick="closeConfigModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="form-group">
+        <label>GOOGLE GEMINI API KEY (FREE TIER)</label>
+        <input type="password" class="form-control" id="cfg-gemini-key" placeholder="AIzaSy...">
+      </div>
+      <div class="form-group">
+        <label>SELECTED AI MODEL</label>
+        <select class="form-control" id="cfg-model">
+          <option value="gemini-2.0-flash">gemini-2.0-flash (Fastest, High Quota)</option>
+          <option value="gemini-1.5-flash">gemini-1.5-flash (Standard Fallback)</option>
+          <option value="nousresearch/hermes-3-llama-3.1-405b">hermes-3-llama-3.1-405b (OpenRouter)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>OPENROUTER API KEY (OPTIONAL)</label>
+        <input type="password" class="form-control" id="cfg-openrouter-key" placeholder="sk-or-v1-...">
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="btn btn-outline" onclick="closeConfigModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveConfig()">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let ws = null;
+    let messageHistory = [];
+    let currentStreamingElem = null;
+
+    function initWebSocket() {
+      const loc = window.location;
+      const wsUri = (loc.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + loc.host + '/ws';
+      ws = new WebSocket(wsUri);
+
+      ws.onopen = () => {
+        document.getElementById('gateway-label').textContent = 'GATEWAY ONLINE';
+        document.getElementById('gateway-label').style.color = 'var(--success)';
+      };
+
+      ws.onclose = () => {
+        document.getElementById('gateway-label').textContent = 'RECONNECTING...';
+        document.getElementById('gateway-label').style.color = 'var(--warning)';
+        setTimeout(initWebSocket, 2000);
+      };
+
+      ws.onmessage = (e) => {
+        try {
+          const resp = JSON.parse(e.data);
+          const res = resp.result || resp;
+          const event = res.event;
+
+          if (event === 'token') {
+            if (!currentStreamingElem) {
+              currentStreamingElem = createAgentMessageContainer();
+            }
+            currentStreamingElem.textContent += res.data;
+            scrollChatToBottom();
+          } else if (event === 'tool_start') {
+            createToolCard(res.id, res.name, res.arguments);
+            scrollChatToBottom();
+          } else if (event === 'tool_output') {
+            updateToolCard(res.id, res.output, res.status);
+            scrollChatToBottom();
+          } else if (event === 'done') {
+            if (currentStreamingElem) {
+              messageHistory.push({ role: 'model', content: currentStreamingElem.textContent });
+              currentStreamingElem = null;
+            }
+          }
+        } catch (err) {
+          console.error('WS Parse Error:', err);
+        }
+      };
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+
+      const titles = {
+        chat: 'Autonomous Terminal & Chat',
+        kanban: 'Autonomous Kanban Task Planner',
+        files: 'Workspace Files & Code Editor',
+        telemetry: 'Real-Time Hardware Telemetry'
+      };
+      document.getElementById('view-title').textContent = titles[tabId] || 'Hermes Dashboard';
+    }
+
+    function createAgentMessageContainer() {
+      const container = document.getElementById('chat-messages');
+      const row = document.createElement('div');
+      row.className = 'msg-row';
+      row.innerHTML = `
+        <div class="msg-avatar agent"><i class="fa-solid fa-feather"></i></div>
+        <div class="msg-body agent-text"></div>
+      `;
+      container.appendChild(row);
+      return row.querySelector('.agent-text');
+    }
+
+    function createToolCard(id, name, args) {
+      const container = document.getElementById('chat-messages');
+      const card = document.createElement('div');
+      card.className = 'tool-box';
+      card.id = 'tool-' + id;
+      card.innerHTML = `
+        <div class="tool-header" onclick="toggleToolContent('${id}')">
+          <div class="tool-title"><i class="fa-solid fa-gear fa-spin"></i> <span>TOOL: ${name}</span></div>
+          <span class="tool-badge running" id="badge-${id}">RUNNING</span>
+        </div>
+        <div class="tool-content" id="content-${id}">${JSON.stringify(args, null, 2)}</div>
+      `;
+      container.appendChild(card);
+    }
+
+    function updateToolCard(id, output, status) {
+      const card = document.getElementById('tool-' + id);
+      if (!card) return;
+      const badge = document.getElementById('badge-' + id);
+      badge.textContent = status === 'completed' ? 'COMPLETED' : 'ERROR';
+      badge.className = 'tool-badge ' + (status === 'completed' ? 'completed' : 'error');
+      card.querySelector('.tool-title i').className = 'fa-solid fa-check';
+      document.getElementById('content-' + id).textContent = output || '(Execution finished with no output)';
+    }
+
+    function toggleToolContent(id) {
+      const c = document.getElementById('content-' + id);
+      if (c) c.style.display = c.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+      // Append User message to UI
+      const container = document.getElementById('chat-messages');
+      const row = document.createElement('div');
+      row.className = 'msg-row';
+      row.innerHTML = `
+        <div class="msg-avatar user"><i class="fa-solid fa-user"></i></div>
+        <div class="msg-body user-bg">${escapeHtml(text)}</div>
+      `;
+      container.appendChild(row);
+      messageHistory.push({ role: 'user', content: text });
+      input.value = '';
+      scrollChatToBottom();
+
+      const rpc = {
+        jsonrpc: '2.0',
+        id: Date.now(),
+        method: 'chat.stream',
+        params: {
+          prompt: text,
+          history: messageHistory,
+          model: document.getElementById('cfg-model').value || 'gemini-2.0-flash',
+          apiKey: document.getElementById('cfg-gemini-key').value || ''
+        }
+      };
+      ws.send(JSON.stringify(rpc));
+    }
+
+    function handleKeyDown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function quickSend(txt) {
+      document.getElementById('chat-input').value = txt;
+      sendMessage();
+    }
+
+    function clearChat() {
+      document.getElementById('chat-messages').innerHTML = '';
+      messageHistory = [];
+    }
+
+    function scrollChatToBottom() {
+      const el = document.getElementById('chat-messages');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Modal controls
+    function openConfigModal() { document.getElementById('config-modal').classList.add('active'); }
+    function closeConfigModal() { document.getElementById('config-modal').classList.remove('active'); }
+
+    function saveConfig() {
+      const key = document.getElementById('cfg-gemini-key').value.trim();
+      const model = document.getElementById('cfg-model').value;
+      if (key) localStorage.setItem('hermes_gemini_key', key);
+      document.getElementById('model-name-display').textContent = model;
+      closeConfigModal();
+    }
+
+    // Telemetry polling
+    setInterval(async () => {
+      try {
+        const res = await fetch('/api/system/stats');
+        if (res.ok) {
+          const stats = await res.json();
+          document.getElementById('stat-cpu').textContent = stats.cpuUsagePercent + '%';
+          document.getElementById('stat-cpu-bar').style.width = stats.cpuUsagePercent + '%';
+          document.getElementById('stat-ram').textContent = stats.ramUsedMb + ' MB';
+          document.getElementById('stat-ram-bar').style.width = (stats.ramUsedMb / 80) + '%';
+          document.getElementById('stat-disk').textContent = stats.diskUsagePercent + '%';
+          document.getElementById('stat-disk-bar').style.width = stats.diskUsagePercent + '%';
+        }
+      } catch (_) {}
+    }, 3000);
+
+    window.onload = () => {
+      const savedKey = localStorage.getItem('hermes_gemini_key');
+      if (savedKey) document.getElementById('cfg-gemini-key').value = savedKey;
+      initWebSocket();
+    };
+  </script>
+</body>
+</html>

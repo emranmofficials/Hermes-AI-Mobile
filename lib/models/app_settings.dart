@@ -31,12 +31,12 @@ class AppSettings {
 
   AppSettings({
     this.connectionMode = ConnectionMode.directCloud,
-    this.gatewayUrl = 'ws://localhost:8000/ws',
+    this.gatewayUrl = 'ws://127.0.0.1:8000/ws',
     this.gatewayToken = '',
-    this.cloudProvider = CloudProvider.openRouter,
+    this.cloudProvider = CloudProvider.gemini,
     this.apiKey = '',
-    this.selectedModel = 'nousresearch/hermes-3-llama-3.1-405b',
-    this.baseUrl = 'https://openrouter.ai/api/v1',
+    this.selectedModel = 'gemini-2.0-flash',
+    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/openai',
     this.temperature = 0.7,
     this.systemPrompt = '''# Role & Persona
 You are Hermes Agent (Nous Research), an autonomous full-stack AI developer, terminal operator, and task planner running in a mobile/Termux environment.
@@ -75,15 +75,15 @@ You are Hermes Agent (Nous Research), an autonomous full-stack AI developer, ter
         (e) => e.name == json['connectionMode'],
         orElse: () => ConnectionMode.directCloud,
       ),
-      gatewayUrl: json['gatewayUrl'] as String? ?? 'ws://localhost:8000/ws',
+      gatewayUrl: json['gatewayUrl'] as String? ?? 'ws://127.0.0.1:8000/ws',
       gatewayToken: json['gatewayToken'] as String? ?? '',
       cloudProvider: CloudProvider.values.firstWhere(
         (e) => e.name == json['cloudProvider'],
-        orElse: () => CloudProvider.openRouter,
+        orElse: () => CloudProvider.gemini,
       ),
       apiKey: json['apiKey'] as String? ?? '',
-      selectedModel: json['selectedModel'] as String? ?? 'nousresearch/hermes-3-llama-3.1-405b',
-      baseUrl: json['baseUrl'] as String? ?? 'https://openrouter.ai/api/v1',
+      selectedModel: json['selectedModel'] as String? ?? 'gemini-2.0-flash',
+      baseUrl: json['baseUrl'] as String? ?? 'https://generativelanguage.googleapis.com/v1beta/openai',
       temperature: (json['temperature'] as num?)?.toDouble() ?? 0.7,
       systemPrompt: json['systemPrompt'] as String? ??
           'You are Hermes Agent, an autonomous and intelligent AI assistant built by Nous Research.',
