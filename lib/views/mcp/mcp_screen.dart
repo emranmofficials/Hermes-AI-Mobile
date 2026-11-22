@@ -166,7 +166,7 @@ class _McpScreenState extends State<McpScreen> {
                 final isOnline = s.status == 'connected';
 
                 return Container(
-                  margin: const EdgeInsets.bottom(12),
+                  margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     color: HermesTheme.cardColor,
                     borderRadius: BorderRadius.circular(14),

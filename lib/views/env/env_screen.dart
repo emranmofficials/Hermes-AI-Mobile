@@ -228,7 +228,7 @@ class _EnvScreenState extends State<EnvScreen> {
                       : s.value);
 
               return Container(
-                margin: const EdgeInsets.bottom(10),
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
                   color: HermesTheme.cardColor,
                   borderRadius: BorderRadius.circular(12),

@@ -224,7 +224,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
           final isActive = p.id == widget.activeProfileId;
 
           return Container(
-            margin: const EdgeInsets.bottom(12),
+            margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
               color: HermesTheme.cardColor,
               borderRadius: BorderRadius.circular(14),

@@ -13,6 +13,22 @@ class AppSettings {
   double temperature;
   String systemPrompt;
 
+  String get geminiApiKey => cloudProvider == CloudProvider.gemini ? apiKey : apiKey;
+  set geminiApiKey(String val) {
+    if (val.isNotEmpty) {
+      apiKey = val;
+      cloudProvider = CloudProvider.gemini;
+    }
+  }
+
+  String get openRouterApiKey => cloudProvider == CloudProvider.openRouter ? apiKey : apiKey;
+  set openRouterApiKey(String val) {
+    if (val.isNotEmpty) {
+      apiKey = val;
+      cloudProvider = CloudProvider.openRouter;
+    }
+  }
+
   AppSettings({
     this.connectionMode = ConnectionMode.directCloud,
     this.gatewayUrl = 'ws://localhost:8000/ws',

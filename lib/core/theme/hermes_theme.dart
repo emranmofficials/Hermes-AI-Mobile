@@ -13,6 +13,7 @@ class HermesTheme {
   static const Color success = Color(0xFF10B981); // Emerald Green
   static const Color warning = Color(0xFFF59E0B); // Amber
   static const Color danger = Color(0xFFEF4444); // Red
+  static const Color error = Color(0xFFEF4444); // Alias for danger
 
   static const Color textPrimary = Color(0xFFF8FAFC);
   static const Color textSecondary = Color(0xFF94A3B8);
