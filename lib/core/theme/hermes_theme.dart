@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class HermesTheme {
+  static const String appVersion = '1.0.12';
+  static const int appBuildNumber = 13;
+
   static const Color background = Color(0xFF090A0F);
   static const Color surface = Color(0xFF131620);
   static const Color cardColor = Color(0xFF191D2C);

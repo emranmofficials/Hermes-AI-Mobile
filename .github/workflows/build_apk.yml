@@ -47,19 +47,16 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.11
-          name: "Hermes Agent v1.0.11 (Active Gemini 3.8 & 3.5 Flash-Lite Resilient Release)"
+          tag_name: v1.0.12
+          name: "Hermes Agent v1.0.12 (Dynamic Versioning & Active Gemini Engine)"
           body: |
-            ## 📱 Hermes Agent Mobile Release v1.0.11
+            ## 📱 Hermes Agent Mobile Release v1.0.12
             
             Official 100% Clone & Gateway Suite of Nous Research Hermes Agent (`NousResearch/hermes-agent`).
             
-            ### ✨ What's Fixed in v1.0.11:
-            - **Eliminated Deprecated Models (Fixed 404):** Google has retired legacy `gemini-1.5-*` and `gemini-2.0-*` models. All fallbacks are now fully migrated to active, supported models:
-              - Flagship: `gemini-3.8-flash`
-              - High-Throughput Fallback: `gemini-3.5-flash-lite` (Never 503 Server Busy)
-              - Lightweight Backup: `gemini-3.1-flash-lite`
-            - **Zero-Demand Quota Safety:** Automatically handles Google traffic spikes without stopping the agent.
+            ### ✨ What's Fixed in v1.0.12:
+            - **Dynamic Android App Versioning (Fixed Stale 1.0.6):** Resolved hardcoded `versionCode: 7` and `versionName: 1.0.6` in `android/app/build.gradle.kts`. App now dynamically links `flutter.versionCode` and `flutter.versionName`, correctly displaying `v1.0.12` in Android Settings and Drawer!
+            - **Eliminated Deprecated Models (Fixed 404):** Replaced legacy `gemini-1.5-*` with active `gemini-3.8-flash`, `gemini-3.5-flash-lite`, and `gemini-3.1-flash-lite`.
             
             ### ⬇️ Download
             Download the signed release APK below:

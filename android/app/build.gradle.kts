@@ -19,8 +19,8 @@ android {
         applicationId = "com.nousresearch.hermes_mobile"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
-        versionCode = 7
-        versionName = "1.0.6"
+        versionCode = flutter.versionCode ?: 13
+        versionName = flutter.versionName ?: "1.0.12"
     }
 
     signingConfigs {

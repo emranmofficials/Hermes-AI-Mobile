@@ -273,8 +273,8 @@ class _SessionsDrawerState extends State<SessionsDrawer> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Hermes Suite v1.0.6',
+                  Text(
+                    'Hermes Suite v${HermesTheme.appVersion}',
                     style: TextStyle(color: HermesTheme.textMuted, fontSize: 11),
                   ),
                   const Spacer(),
