@@ -123,7 +123,18 @@ class HermesService {
   ) async* {
     final client = http.Client();
     try {
-      final endpoint = Uri.parse('${settings.baseUrl}/chat/completions');
+      String url = settings.baseUrl.trim();
+      if (url.isEmpty) {
+        if (settings.cloudProvider == CloudProvider.gemini) {
+          url = 'https://generativelanguage.googleapis.com/v1beta/openai';
+        } else {
+          url = 'https://openrouter.ai/api/v1';
+        }
+      }
+      if (url.endsWith('/')) url = url.substring(0, url.length - 1);
+      final endpoint = url.endsWith('/chat/completions')
+          ? Uri.parse(url)
+          : Uri.parse('$url/chat/completions');
 
       String memoryContext = '';
       if (activeMemories != null && activeMemories.isNotEmpty) {

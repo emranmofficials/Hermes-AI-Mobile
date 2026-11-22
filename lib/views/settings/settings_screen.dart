@@ -224,18 +224,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: const TextStyle(color: HermesTheme.textPrimary, fontSize: 13),
                     decoration: const InputDecoration(labelText: 'Provider'),
                     items: const [
-                      DropdownMenuItem(value: CloudProvider.openRouter, child: Text('OpenRouter (Recommended)')),
+                      DropdownMenuItem(value: CloudProvider.gemini, child: Text('Google Gemini (Gemini API)')),
+                      DropdownMenuItem(value: CloudProvider.openRouter, child: Text('OpenRouter (Nous / Multi-Model)')),
                       DropdownMenuItem(value: CloudProvider.nousPortal, child: Text('Nous Research Portal')),
-                      DropdownMenuItem(value: CloudProvider.ollama, child: Text('Local Ollama (Offline)')),
                       DropdownMenuItem(value: CloudProvider.openai, child: Text('OpenAI Compatible')),
+                      DropdownMenuItem(value: CloudProvider.ollama, child: Text('Local Ollama (Offline)')),
                     ],
                     onChanged: (val) {
                       if (val != null) {
                         setState(() {
                           _provider = val;
-                          if (val == CloudProvider.openRouter) {
+                          if (val == CloudProvider.gemini) {
+                            _baseUrlCtrl.text = 'https://generativelanguage.googleapis.com/v1beta/openai';
+                            _modelCtrl.text = 'gemini-2.5-pro';
+                          } else if (val == CloudProvider.openRouter) {
                             _baseUrlCtrl.text = 'https://openrouter.ai/api/v1';
                             _modelCtrl.text = 'nousresearch/hermes-3-llama-3.1-405b';
+                          } else if (val == CloudProvider.nousPortal) {
+                            _baseUrlCtrl.text = 'https://portal.nousresearch.com/v1';
+                            _modelCtrl.text = 'hermes-3-llama-3.1-405b';
                           } else if (val == CloudProvider.ollama) {
                             _baseUrlCtrl.text = 'http://localhost:11434/v1';
                             _modelCtrl.text = 'hermes3';
@@ -249,9 +256,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     controller: _apiKeyCtrl,
                     obscureText: true,
                     style: const TextStyle(color: HermesTheme.textPrimary, fontSize: 13),
-                    decoration: const InputDecoration(
-                      labelText: 'API Key',
-                      hintText: 'sk-or-v1-...',
+                    decoration: InputDecoration(
+                      labelText: _provider == CloudProvider.gemini ? 'Gemini API Key' : 'API Key',
+                      hintText: _provider == CloudProvider.gemini ? 'AIzaSy... (from aistudio.google.com)' : 'sk-or-v1-...',
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -260,9 +267,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: const TextStyle(color: HermesTheme.textPrimary, fontSize: 13),
                     decoration: const InputDecoration(
                       labelText: 'Model Identifier',
-                      hintText: 'nousresearch/hermes-3-llama-3.1-405b',
+                      hintText: 'gemini-2.5-pro / nousresearch/hermes-3-405b',
                     ),
                   ),
+                  if (_provider == CloudProvider.gemini) ...[
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        'gemini-2.5-pro',
+                        'gemini-2.5-flash',
+                        'gemini-1.5-pro',
+                        'gemini-1.5-flash',
+                      ].map((m) {
+                        final isSelected = _modelCtrl.text == m;
+                        return ChoiceChip(
+                          label: Text(m, style: TextStyle(fontSize: 11, color: isSelected ? Colors.black : HermesTheme.textPrimary)),
+                          selected: isSelected,
+                          selectedColor: HermesTheme.primary,
+                          backgroundColor: HermesTheme.surface,
+                          onSelected: (selected) {
+                            if (selected) setState(() => _modelCtrl.text = m);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   TextField(
                     controller: _baseUrlCtrl,
