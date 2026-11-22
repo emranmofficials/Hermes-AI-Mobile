@@ -47,27 +47,21 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.8
-          name: "Hermes Agent v1.0.8 (Real Autonomous Engine Release)"
+          tag_name: v1.0.9
+          name: "Hermes Agent v1.0.9 (Resilient Fallback & Quick Model Switcher Release)"
           body: |
-            ## 📱 Hermes Agent Mobile Release v1.0.8 (Real Autonomous Engine Release)
+            ## 📱 Hermes Agent Mobile Release v1.0.9
             
             Official 100% Mobile Clone of Nous Research Hermes Agent Webapp & Dashboard (`NousResearch/hermes-agent`).
             
-            ### ✨ What's Fixed & Implemented in v1.0.8:
-            - **Removed All Simulated / Dummy Loops:** Permanently eliminated all canned mock responses.
-            - **Real On-Device Tool Execution Engine (`ToolExecutor`):**
-              - `bash`: Actually executes real shell commands via `Process.run('sh')` on Android/Termux and captures real stdout/stderr.
-              - `write_file`: Actually creates and saves real code and files on disk.
-              - `read_file`: Actually reads and inspects real files from the workspace.
-              - `list_files`: Real directory tree browsing and file listing.
-              - `web_search`: Real live internet queries via DuckDuckGo.
-            - **Multi-Turn Autonomous Tool Loop:** AI generates tool calls, device executes them in real time, and feeds outputs back into the reasoning loop.
-            - **100% Web Parity Suite:** MCP Manager, WhatsApp QR pairing, Telegram bot, Profiles & SOUL.md editor, Cron scheduler, Secrets Vault, Analytics, and Telemetry.
+            ### ✨ What's New in v1.0.9:
+            - **Automatic HTTP 503 Resilient Fallback:** When Google Gemini servers report temporary high demand (HTTP 503), the engine automatically falls back to `gemini-2.0-flash` or `gemini-1.5-flash` so your prompt never fails!
+            - **Header Quick Model Switcher:** Tap the model chip in the chat header to instantly switch between `gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-3.8-flash`, `gemini-3.1-pro-preview`, and `hermes-3-405b`.
+            - **Real On-Device Tool Execution:** Live bash commands on Termux/Android, real file creation/editing, and live web search.
             
             ### ⬇️ Download
             Download the signed release APK below:
-            - **[app-release.apk](https://github.com/emranmofficials/Hermes-AI-Mobile/releases/download/v1.0.8/app-release.apk)**
+            - **[app-release.apk](https://github.com/emranmofficials/Hermes-AI-Mobile/releases/download/v1.0.9/app-release.apk)**
             
             Download the APK below and install on your Android device!
           files: build/app/outputs/flutter-apk/app-release.apk

@@ -222,6 +222,74 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _openModelSwitcher(BuildContext context) {
+    final models = [
+      {'id': 'gemini-2.0-flash', 'desc': 'Fastest & Most Reliable (High Free Tier Availability)'},
+      {'id': 'gemini-1.5-flash', 'desc': 'Rock-Solid Stable Fallback'},
+      {'id': 'gemini-3.8-flash', 'desc': 'Latest Google Reasoning Model'},
+      {'id': 'gemini-3.1-pro-preview', 'desc': 'Pro Reasoning Model (Paid Tier)'},
+      {'id': 'nousresearch/hermes-3-llama-3.1-405b', 'desc': 'Nous Research OpenRouter Model'},
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: HermesTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.psychology_rounded, color: HermesTheme.primary, size: 22),
+                SizedBox(width: 8),
+                Text('Quick Model Switcher', style: TextStyle(color: HermesTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            const Text('Switch active AI engine instantly. If Google returns HTTP 503 high demand, switch to gemini-2.0-flash.', style: TextStyle(color: HermesTheme.textMuted, fontSize: 11)),
+            const SizedBox(height: 14),
+            ...models.map((m) {
+              final isSelected = widget.settings.selectedModel.contains(m['id']!);
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? HermesTheme.cardColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: isSelected ? HermesTheme.primary : HermesTheme.cardBorder),
+                ),
+                child: ListTile(
+                  dense: true,
+                  title: Text(m['id']!, style: TextStyle(color: isSelected ? HermesTheme.primary : HermesTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+                  subtitle: Text(m['desc']!, style: const TextStyle(color: HermesTheme.textMuted, fontSize: 10)),
+                  trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: HermesTheme.primary, size: 18) : null,
+                  onTap: () {
+                    setState(() {
+                      widget.settings.selectedModel = m['id']!;
+                    });
+                    LocalStorage.saveSettings(widget.settings);
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: HermesTheme.success,
+                        content: Text('✓ Switched active model to ${m['id']}'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final modelName = widget.settings.selectedModel.split('/').last;
@@ -267,7 +335,7 @@ class _ChatScreenState extends State<ChatScreen> {
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             InkWell(
-              onTap: widget.onOpenSettings,
+              onTap: () => _openModelSwitcher(context),
               borderRadius: BorderRadius.circular(4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

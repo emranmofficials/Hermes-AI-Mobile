@@ -214,12 +214,45 @@ Whenever the user asks you to perform a task (e.g. check files, run commands, cr
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode(requestBody);
 
-      final response = await client.send(request);
+      var response = await client.send(request);
 
       if (response.statusCode != 200) {
         final body = await response.stream.bytesToString();
-        yield {'type': 'error', 'content': 'Gemini API Error (${response.statusCode}): $body'};
-        return;
+        // If 503 (high demand) or 404: Auto-fallback to gemini-2.0-flash or gemini-1.5-flash
+        if (response.statusCode == 503 || response.statusCode == 404) {
+          yield {
+            'type': 'token',
+            'content': '⚡ *[Google Gemini ($modelName) সাময়িক ব্যস্ত (HTTP 503)। অটোমেটিক ব্যাকআপ মডেল gemini-2.0-flash এ সুইচ করা হচ্ছে...]*\n\n'
+          };
+
+          final fallbackEndpoint = Uri.parse(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${settings.apiKey}',
+          );
+          final fallbackReq = http.Request('POST', fallbackEndpoint);
+          fallbackReq.headers['Content-Type'] = 'application/json';
+          fallbackReq.body = jsonEncode(requestBody);
+          response = await client.send(fallbackReq);
+
+          if (response.statusCode != 200) {
+            // Second fallback to gemini-1.5-flash
+            final secondFallbackEndpoint = Uri.parse(
+              'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${settings.apiKey}',
+            );
+            final secondReq = http.Request('POST', secondFallbackEndpoint);
+            secondReq.headers['Content-Type'] = 'application/json';
+            secondReq.body = jsonEncode(requestBody);
+            response = await client.send(secondReq);
+
+            if (response.statusCode != 200) {
+              final secondBody = await response.stream.bytesToString();
+              yield {'type': 'error', 'content': 'Gemini Fallback Error (${response.statusCode}): $secondBody'};
+              return;
+            }
+          }
+        } else {
+          yield {'type': 'error', 'content': 'Gemini API Error (${response.statusCode}): $body'};
+          return;
+        }
       }
 
       final stream = response.stream
