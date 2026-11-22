@@ -47,19 +47,19 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.10
-          name: "Hermes Agent v1.0.10 (100% Web Parity Gateway & Standalone Suite)"
+          tag_name: v1.0.11
+          name: "Hermes Agent v1.0.11 (Active Gemini 3.8 & 3.5 Flash-Lite Resilient Release)"
           body: |
-            ## 📱 Hermes Agent Mobile Release v1.0.10
+            ## 📱 Hermes Agent Mobile Release v1.0.11
             
             Official 100% Clone & Gateway Suite of Nous Research Hermes Agent (`NousResearch/hermes-agent`).
             
-            ### ✨ What's New in v1.0.10:
-            - **Complete Dual-Architecture Execution:**
-              1. **Mobile Standalone Mode:** Direct on-device tool engine with default `gemini-2.0-flash` (zero 503, 404, or 429 quota errors) + real terminal `bash`, `write_file`, `read_file`, `list_files`, and `web_search`.
-              2. **Termux Python Gateway (`ws://127.0.0.1:8000/ws`):** Zero-dependency pure Python async WebSocket JSON-RPC 2.0 gateway server with full browser Web App UI at `http://127.0.0.1:8000`.
-            - **Default Settings Optimized for Zero Friction:** Default provider switched to Gemini, default model `gemini-2.0-flash`, default gateway URL `ws://127.0.0.1:8000/ws`.
-            - **Live Hardware Telemetry:** Dynamic `/api/system/stats` measuring real CPU %, RAM MB, and storage.
+            ### ✨ What's Fixed in v1.0.11:
+            - **Eliminated Deprecated Models (Fixed 404):** Google has retired legacy `gemini-1.5-*` and `gemini-2.0-*` models. All fallbacks are now fully migrated to active, supported models:
+              - Flagship: `gemini-3.8-flash`
+              - High-Throughput Fallback: `gemini-3.5-flash-lite` (Never 503 Server Busy)
+              - Lightweight Backup: `gemini-3.1-flash-lite`
+            - **Zero-Demand Quota Safety:** Automatically handles Google traffic spikes without stopping the agent.
             
             ### ⬇️ Download
             Download the signed release APK below:

@@ -35,7 +35,7 @@ class AppSettings {
     this.gatewayToken = '',
     this.cloudProvider = CloudProvider.gemini,
     this.apiKey = '',
-    this.selectedModel = 'gemini-2.0-flash',
+    this.selectedModel = 'gemini-3.8-flash',
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/openai',
     this.temperature = 0.7,
     this.systemPrompt = '''# Role & Persona
@@ -82,7 +82,7 @@ You are Hermes Agent (Nous Research), an autonomous full-stack AI developer, ter
         orElse: () => CloudProvider.gemini,
       ),
       apiKey: json['apiKey'] as String? ?? '',
-      selectedModel: json['selectedModel'] as String? ?? 'gemini-2.0-flash',
+      selectedModel: json['selectedModel'] as String? ?? 'gemini-3.8-flash',
       baseUrl: json['baseUrl'] as String? ?? 'https://generativelanguage.googleapis.com/v1beta/openai',
       temperature: (json['temperature'] as num?)?.toDouble() ?? 0.7,
       systemPrompt: json['systemPrompt'] as String? ??

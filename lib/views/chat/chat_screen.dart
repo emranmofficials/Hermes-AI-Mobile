@@ -224,10 +224,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _openModelSwitcher(BuildContext context) {
     final models = [
-      {'id': 'gemini-2.0-flash', 'desc': 'Fastest & Most Reliable (High Free Tier Availability)'},
-      {'id': 'gemini-1.5-flash', 'desc': 'Rock-Solid Stable Fallback'},
-      {'id': 'gemini-3.8-flash', 'desc': 'Latest Google Reasoning Model'},
-      {'id': 'gemini-3.1-pro-preview', 'desc': 'Pro Reasoning Model (Paid Tier)'},
+      {'id': 'gemini-3.8-flash', 'desc': 'Flagship Multimodal Agent (Recommended)'},
+      {'id': 'gemini-3.5-flash-lite', 'desc': 'High-Throughput 3.5 (Never 503 Server Busy)'},
+      {'id': 'gemini-3.1-flash-lite', 'desc': 'Ultra-Fast Lightweight Model'},
       {'id': 'nousresearch/hermes-3-llama-3.1-405b', 'desc': 'Nous Research OpenRouter Model'},
     ];
 
@@ -251,7 +250,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             ),
             const SizedBox(height: 6),
-            const Text('Switch active AI engine instantly. If Google returns HTTP 503 high demand, switch to gemini-2.0-flash.', style: TextStyle(color: HermesTheme.textMuted, fontSize: 11)),
+            const Text('Switch active AI engine instantly. If Google returns HTTP 503 high demand, switch to gemini-3.5-flash-lite.', style: TextStyle(color: HermesTheme.textMuted, fontSize: 11)),
             const SizedBox(height: 14),
             ...models.map((m) {
               final isSelected = widget.settings.selectedModel.contains(m['id']!);

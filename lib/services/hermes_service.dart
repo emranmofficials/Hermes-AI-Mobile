@@ -175,8 +175,15 @@ Whenever the user asks you to perform a task (e.g. check files, run commands, cr
       if (modelName.startsWith('models/')) {
         modelName = modelName.replaceFirst('models/', '');
       }
-      if (modelName.isEmpty || modelName.contains('hermes') || modelName.contains('llama') || modelName.contains('3.1-pro')) {
-        modelName = 'gemini-2.0-flash';
+      // Migrate legacy/deprecated models (1.5, 2.0, 2.5, 3.1-pro) to current active models
+      if (modelName.isEmpty ||
+          modelName.contains('hermes') ||
+          modelName.contains('llama') ||
+          modelName.contains('1.5') ||
+          modelName.contains('2.0') ||
+          modelName.contains('2.5') ||
+          modelName.contains('3.1-pro')) {
+        modelName = 'gemini-3.8-flash';
       }
 
       final endpoint = Uri.parse(
@@ -220,15 +227,15 @@ Whenever the user asks you to perform a task (e.g. check files, run commands, cr
 
       if (response.statusCode != 200) {
         final body = await response.stream.bytesToString();
-        // If 503 (high demand) or 404: Auto-fallback to gemini-2.0-flash or gemini-1.5-flash
+        // If 503 (high demand) or 404: Auto-fallback to gemini-3.5-flash-lite or gemini-3.1-flash-lite
         if (response.statusCode == 503 || response.statusCode == 404) {
           yield {
             'type': 'token',
-            'content': '⚡ *[Google Gemini ($modelName) সাময়িক ব্যস্ত (HTTP 503)। অটোমেটিক ব্যাকআপ মডেল gemini-2.0-flash এ সুইচ করা হচ্ছে...]*\n\n'
+            'content': '⚡ *[Google Gemini ($modelName) সাময়িক ব্যস্ত (HTTP 503)। অটোমেটিক হাই-ক্যাপাসিটি মডেল gemini-3.5-flash-lite এ সুইচ করা হচ্ছে...]*\n\n'
           };
 
           final fallbackEndpoint = Uri.parse(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${settings.apiKey}',
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse&key=${settings.apiKey}',
           );
           final fallbackReq = http.Request('POST', fallbackEndpoint);
           fallbackReq.headers['Content-Type'] = 'application/json';
@@ -236,9 +243,9 @@ Whenever the user asks you to perform a task (e.g. check files, run commands, cr
           response = await client.send(fallbackReq);
 
           if (response.statusCode != 200) {
-            // Second fallback to gemini-1.5-flash
+            // Second fallback to gemini-3.1-flash-lite
             final secondFallbackEndpoint = Uri.parse(
-              'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${settings.apiKey}',
+              'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:streamGenerateContent?alt=sse&key=${settings.apiKey}',
             );
             final secondReq = http.Request('POST', secondFallbackEndpoint);
             secondReq.headers['Content-Type'] = 'application/json';

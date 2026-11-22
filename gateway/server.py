@@ -34,7 +34,7 @@ DEFAULT_CONFIG = {
     "provider": "gemini",
     "gemini_api_key": os.environ.get("GEMINI_API_KEY", ""),
     "openrouter_api_key": os.environ.get("OPENROUTER_API_KEY", ""),
-    "model": "gemini-2.0-flash",
+    "model": "gemini-3.8-flash",
     "temperature": 0.7,
     "system_prompt": (
         "You are Hermes Agent (Nous Research), an autonomous full-stack AI developer and operator.\n"
@@ -246,9 +246,9 @@ async def stream_gemini_response(prompt, history, api_key, model='gemini-2.0-fla
     except urllib.error.HTTPError as e:
         err_body = e.read().decode('utf-8', errors='replace')
         if e.code == 503 or e.code == 404:
-            # Fallback to gemini-1.5-flash
-            yield {"type": "token", "content": f"⚡ *[Google Gemini ({model}) ব্যস্ত। ব্যাকআপ gemini-1.5-flash-এ সুইচ করা হচ্ছে...]*\n\n"}
-            async for chunk in stream_gemini_response(prompt, history, api_key, model='gemini-1.5-flash'):
+            # Fallback to gemini-3.5-flash-lite
+            yield {"type": "token", "content": f"⚡ *[Google Gemini ({model}) ব্যস্ত। ব্যাকআপ gemini-3.5-flash-lite-এ সুইচ করা হচ্ছে...]*\n\n"}
+            async for chunk in stream_gemini_response(prompt, history, api_key, model='gemini-3.5-flash-lite'):
                 yield chunk
             return
         yield {"type": "token", "content": f"⚠️ Gemini API Error ({e.code}): {err_body}"}
