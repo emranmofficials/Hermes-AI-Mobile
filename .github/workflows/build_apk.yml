@@ -47,8 +47,8 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "Hermes AI Mobile v1.0.0 Release"
+          tag_name: v1.0.1
+          name: "Hermes AI Mobile v1.0.1 Release"
           body: |
             ## 📱 Hermes AI Mobile Release v1.0.0
             
