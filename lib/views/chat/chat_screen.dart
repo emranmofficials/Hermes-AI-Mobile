@@ -7,6 +7,7 @@ import '../../models/app_settings.dart';
 import '../../models/message.dart';
 import '../../models/session.dart';
 import '../../models/tool_call.dart';
+import '../../models/system_log.dart';
 import '../../services/hermes_service.dart';
 import '../sessions/sessions_drawer.dart';
 import 'widgets/chat_input_bar.dart';
@@ -15,11 +16,13 @@ import 'widgets/message_bubble.dart';
 class ChatScreen extends StatefulWidget {
   final AppSettings settings;
   final VoidCallback onOpenSettings;
+  final Function(String)? onOpenModule;
 
   const ChatScreen({
     super.key,
     required this.settings,
     required this.onOpenSettings,
+    this.onOpenModule,
   });
 
   @override
@@ -144,6 +147,13 @@ class _ChatScreenState extends State<ChatScreen> {
     LocalStorage.saveSessions(_sessions);
     LocalStorage.saveMessages(_activeSession!.id, _messages);
 
+    LocalStorage.addLog(SystemLog(
+      timestamp: DateTime.now(),
+      level: 'INFO',
+      tag: 'CHAT',
+      message: 'User prompt: ${prompt.length > 35 ? "${prompt.substring(0, 35)}..." : prompt}',
+    ));
+
     // Load active memories and skills for context
     final memories = await LocalStorage.loadMemories();
     final skills = await LocalStorage.loadSkills();
@@ -240,6 +250,7 @@ class _ChatScreenState extends State<ChatScreen> {
           });
           LocalStorage.saveSessions(_sessions);
         },
+        onOpenModule: widget.onOpenModule,
       ),
       appBar: AppBar(
         leading: IconButton(

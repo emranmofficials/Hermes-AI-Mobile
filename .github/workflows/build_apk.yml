@@ -47,16 +47,29 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.6
-          name: "Hermes Agent v1.0.6 Release"
+          tag_name: v1.0.7
+          name: "Hermes Agent v1.0.7 (100% Web Parity Release)"
           body: |
-            ## 📱 Hermes Agent Mobile Release v1.0.6
+            ## 📱 Hermes Agent Mobile Release v1.0.7 (100% Web Parity Release)
             
             Official 100% Mobile Clone of Nous Research Hermes Agent Webapp & Dashboard (`NousResearch/hermes-agent`).
             
-            ### ✨ What's New in v1.0.6
-            - **Google Gemini Official Native REST API Integration:** Implemented direct `v1beta/models/:streamGenerateContent` support, bypassing third-party adapter issues.
-            - **Universal Model Compatibility:** Flawless streaming with `gemini-3.8-flash` and all official Gemini models.
+            ### ✨ What's New in v1.0.7:
+            - **MCP Servers Manager (`/mcp`):** Full support for managing stdio, SSE, and HTTP MCP servers (Filesystem, GitHub, Brave Search, Postgres, Memory) with connection testing and exposed tools inspector.
+            - **Messaging Channels & Relays (`/channels`):** WhatsApp Onboarding with live QR code pairing, Telegram Bot relay (@HermesAgentBot) with allowlist, Discord & Slack webhooks.
+            - **Agent Profiles & Soul Builder (`/profiles`):** Multi-persona management (Generalist, Architect, Researcher, DevOps) with in-app `SOUL.md` system prompt editor.
+            - **Cron Automations & Scheduler (`/cron`):** Recurring scheduled agent tasks with custom cron expressions and multi-channel delivery targets (Web Chat, WhatsApp, Telegram).
+            - **Environment & Secrets Vault (`/env`):** Secure key-value store for API keys (Gemini, OpenRouter, OpenAI, Anthropic, Tavily, Serper, GitHub, Supabase, Firebase) with Mask/Reveal toggle.
+            - **Token Analytics & Cost Tracker (`/analytics`):** Real-time tracking of prompt/completion tokens, USD cost estimator, and per-model consumption breakdown.
+            - **Execution & System Logs (`/logs`):** Live streaming logs viewer with level filtering (ALL, INFO, WARN, ERROR, DEBUG), search query, and clipboard export.
+            - **System Telemetry & Hardware Monitor (`/system`):** Live CPU, RAM, and Disk utilization gauges, gateway latency ping, and active worker telemetry.
+            - **Device Pairing & QR Bridge (`/pairing`):** Visual QR code and pairing token generator for connecting mobile app to remote Hermes desktop/web gateway.
+            - **Hermes Suite Hub (`/hub`):** Complete central control center bringing 1-click access to all 10+ modules.
+            - **Universal Navigation & Drawer:** Enhanced SessionsDrawer with session keyword search and 1-click quick jumps across all agent features.
+            
+            ### ⬇️ Download
+            Download the signed release APK below:
+            - **[app-release.apk](https://github.com/emranmofficials/Hermes-AI-Mobile/releases/download/v1.0.7/app-release.apk)**
             
             Download the APK below and install on your Android device!
           files: build/app/outputs/flutter-apk/app-release.apk
