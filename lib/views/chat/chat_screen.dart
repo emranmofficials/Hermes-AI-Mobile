@@ -255,26 +255,32 @@ class _ChatScreenState extends State<ChatScreen> {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
-            Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: HermesTheme.success,
-                    shape: BoxShape.circle,
+            InkWell(
+              onTap: widget.onOpenSettings,
+              borderRadius: BorderRadius.circular(4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: HermesTheme.success,
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  modelName,
-                  style: const TextStyle(
-                    color: HermesTheme.primary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
+                  const SizedBox(width: 6),
+                  Text(
+                    modelName,
+                    style: const TextStyle(
+                      color: HermesTheme.primary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                  const Icon(Icons.arrow_drop_down, size: 14, color: HermesTheme.primary),
+                ],
+              ),
             ),
           ],
         ),

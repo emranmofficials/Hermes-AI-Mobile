@@ -236,7 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _provider = val;
                           if (val == CloudProvider.gemini) {
                             _baseUrlCtrl.text = 'https://generativelanguage.googleapis.com/v1beta/openai';
-                            _modelCtrl.text = 'gemini-2.5-pro';
+                            _modelCtrl.text = 'gemini-3.1-pro-preview';
                           } else if (val == CloudProvider.openRouter) {
                             _baseUrlCtrl.text = 'https://openrouter.ai/api/v1';
                             _modelCtrl.text = 'nousresearch/hermes-3-llama-3.1-405b';
@@ -276,10 +276,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       spacing: 8,
                       runSpacing: 4,
                       children: [
-                        'gemini-2.5-pro',
+                        'gemini-3.1-pro-preview',
                         'gemini-2.5-flash',
-                        'gemini-1.5-pro',
+                        'gemini-2.0-flash',
                         'gemini-1.5-flash',
+                        'gemini-1.5-pro',
                       ].map((m) {
                         final isSelected = _modelCtrl.text == m;
                         return ChoiceChip(

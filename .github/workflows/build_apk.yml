@@ -47,25 +47,17 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.3
-          name: "Hermes Agent v1.0.3 Release"
+          tag_name: v1.0.4
+          name: "Hermes Agent v1.0.4 Release"
           body: |
-            ## 📱 Hermes Agent Mobile Release v1.0.3
+            ## 📱 Hermes Agent Mobile Release v1.0.4
             
             Official 100% Mobile Clone of Nous Research Hermes Agent Webapp & Dashboard (`NousResearch/hermes-agent`).
             
-            ### ✨ What's New in v1.0.3
-            - **Google Gemini API Provider Integration:** Added first-class Google Gemini support in Settings with quick model chips (`gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-1.5-pro`, `gemini-1.5-flash`).
-            - **Interactive Plugin & Marketplace Store:** 1-click addition of official cloud and design plugins:
-              - ⚡ **Supabase Cloud Backend** (PostgreSQL, Realtime, Auth, Storage)
-              - 🔥 **Firebase Cloud Services** (Firestore, Cloud Functions, Security Rules, Auth)
-              - 🎨 **Canva Creative Studio** (Banners, Social graphics, AI Marketing designs)
-              - 📐 **Figma to Code** (Figma to Flutter & Web code generation)
-              - ☁️ **Cloudflare Edge Cloud** (Deploy websites to Cloudflare Pages & Workers)
-              - 🌐 **Netlify Hosting** (Instant web preview & serverless forms)
-              - 🐙 **GitHub Teamwork** (Git commits, PR creation, CI/CD Actions)
-              - 🕷️ **Web Scraping & Browser Automation** (Puppeteer & live web crawling)
-            - **One-by-One Plugin Addition:** Tap to add, configure API keys, and manage plugins smoothly.
+            ### ✨ What's New in v1.0.4
+            - **Updated Google Gemini Models:** Updated Gemini model identifier to `gemini-3.1-pro-preview` and `gemini-2.5-flash` following Google API deprecation of `gemini-2.5-pro`.
+            - **Interactive Model Switcher:** Tap model name in chat header to directly access and switch models.
+            - **Plugin Marketplace:** Full 1-click addition of Supabase, Firebase, Canva, Figma, Cloudflare, Netlify, GitHub, and Web Scraper.
             
             Download the APK below and install on your Android device!
           files: build/app/outputs/flutter-apk/app-release.apk
