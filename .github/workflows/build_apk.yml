@@ -1,0 +1,70 @@
+name: Build Hermes AI Mobile APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Android Release APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hermes-ai-mobile-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "Hermes AI Mobile v1.0.0 Release"
+          body: |
+            ## 📱 Hermes AI Mobile Release v1.0.0
+            
+            100% Mobile Clone of the official Nous Research Hermes Agent Webapp & Dashboard (`NousResearch/hermes-agent`).
+            
+            ### ✨ Included Features
+            - **Live Agent Chat & Token Streaming** with rich Markdown & Code syntax highlighting.
+            - **Autonomous Tool Call Cards** (`bash`, `web_search`, `read_file`, `write_file`).
+            - **Kanban Task Planning Board** (`/kanban`).
+            - **Workspace File Explorer & Editor** (`/api/files`).
+            - **Dynamic Skills Hub** (`/skills`, `SKILL.md`).
+            - **Long-term Persistent Memory** (`/memory`, `USER.md` & `MEMORY.md`).
+            - **System Stats & Telemetry** (`/api/system/stats`).
+            - **JSON-RPC 2.0 over WebSocket** protocol support.
+            
+            Download the APK below and install on your Android device!
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

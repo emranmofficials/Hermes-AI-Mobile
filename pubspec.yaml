@@ -1,0 +1,29 @@
+name: hermes_mobile
+description: "Hermes AI Mobile - 100% Mobile Clone of Nous Research Hermes Agent"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  http: ^1.4.0
+  web_socket_channel: ^3.0.1
+  shared_preferences: ^2.5.5
+  path_provider: ^2.1.6
+  flutter_markdown: ^0.7.6+1
+  flutter_highlight: ^0.7.0
+  intl: ^0.20.2
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
